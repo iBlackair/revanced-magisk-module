@@ -93,7 +93,7 @@ jobs:
             UPDATE_JSON="${UPDATE_JSON##*/}"
             VER=$(echo "$ZIP_S" | grep version=)
             VER="${VER##*=}"
-            DLURL="<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}>"
+            DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
             get_update_json "$VER" "$DLURL" >"../$UPDATE_JSON"
           done
           cd ..
@@ -109,11 +109,11 @@ jobs:
 
       - name: Report to Discord
         env:
-          WEBHOOK_ID: ${{ secrets.WEBHOOK_ID }}
-          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
-        if: env.WEBHOOK_ID != null && env.WEBHOOK_TOKEN != null
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        if: ${{ secrets.DISCORD_WEBHOOK != '' }}
         run: |
-          cd build || { echo "build folder not found"; exit 1; }
+          [ -d build ] || { echo "build folder not found"; exit 1; }
+          cd build
 
           NL=$'\n'
           APKS=""
@@ -121,23 +121,21 @@ jobs:
           for OUTPUT in *; do
             DL_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
             if [[ $OUTPUT = *.apk ]]; then
-              APKS+="\n📦[${OUTPUT}](${DL_URL})"
+              APKS+="${NL}📦[${OUTPUT}](${DL_URL})"
             elif [[ $OUTPUT = *.zip ]]; then
-              MODULES+="\n📦[${OUTPUT}](${DL_URL})"
+              MODULES+="${NL}📦[${OUTPUT}](${DL_URL})"
             fi
           done
-          MODULES=${MODULES#"\n"}
-          APKS=${APKS#"\n"}
+          MODULES=${MODULES#"$NL"}
+          APKS=${APKS#"$NL"}
 
           BODY="$(sed ':a;N;$!ba;s/\n/\\n/g' ../build.md)"
-          
+
           MSG="**New build!**\n\n${BODY}\n\n**▼ Download Links:**\nModules:\n${MODULES}\n\nAPKs:\n${APKS}"
-          
-          echo "'$MSG'"
 
           # Limit Discord messages to 2000 characters
           MAX_LENGTH=2000
-          POST="https://discord.com/api/webhooks/${WEBHOOK_ID}/${WEBHOOK_TOKEN}"
+          POST="https://discord.com/api/webhooks/${DISCORD_WEBHOOK}"
 
           while [ ${#MSG} -gt $MAX_LENGTH ]; do
             PART="${MSG:0:$MAX_LENGTH}"
