@@ -134,6 +134,16 @@ jobs:
           MSG="**New build!**\n\n${BODY}\n\n**▼ Download Links:**\nModules:\n${MODULES}\n\nAPKs:\n${APKS}"
           
           echo "'$MSG'"
-          MSG=${MSG:0:9450}
+
+          # Limit Discord messages to 2000 characters
+          MAX_LENGTH=2000
           POST="https://discord.com/api/webhooks/${WEBHOOK_ID}/${WEBHOOK_TOKEN}"
+
+          while [ ${#MSG} -gt $MAX_LENGTH ]; do
+            PART="${MSG:0:$MAX_LENGTH}"
+            MSG="${MSG:$MAX_LENGTH}"
+            curl -X POST --header "Content-Type: application/json" --data "{\"content\": \"$PART\"}" "$POST"
+          done
+
+          # Send the last remaining part of the message
           curl -X POST --header "Content-Type: application/json" --data "{\"content\": \"$MSG\"}" "$POST"
