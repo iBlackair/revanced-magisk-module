@@ -130,10 +130,9 @@ jobs:
           APKS=${APKS#"$NL"}
 
           BODY="$(sed ':a;N;$!ba;s/\n/\\n/g' ../build.md)"
-          
+
           MSG="**New build!**\n\n${BODY}\n\n**▼ Download Links:**\nModules:\n${MODULES}\n\nAPKs:\n${APKS}"
           
-          echo "'$MSG'"
           MSG=${MSG:0:9450}
-          POST="https://discord.com/api/webhooks/${DISCORD_WEBHOOK}"
+          POST="https://discord.com/api/webhooks/${WEBHOOK_ID}/${WEBHOOK_TOKEN}"
           curl -X POST --header "Content-Type: application/json" --data "{\"content\": \"$MSG\"}" "$POST"
