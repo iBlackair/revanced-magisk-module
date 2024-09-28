@@ -93,7 +93,7 @@ jobs:
             UPDATE_JSON="${UPDATE_JSON##*/}"
             VER=$(echo "$ZIP_S" | grep version=)
             VER="${VER##*=}"
-            DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
+            DLURL="<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}>"
             get_update_json "$VER" "$DLURL" >"../$UPDATE_JSON"
           done
           cd ..
@@ -130,9 +130,10 @@ jobs:
           APKS=${APKS#"$NL"}
 
           BODY="$(sed ':a;N;$!ba;s/\n/\\n/g' ../build.md)"
-
+          
           MSG="**New build!**\n\n${BODY}\n\n**▼ Download Links:**\nModules:\n${MODULES}\n\nAPKs:\n${APKS}"
           
+          echo "'$MSG'"
           MSG=${MSG:0:9450}
           POST="https://discord.com/api/webhooks/${WEBHOOK_ID}/${WEBHOOK_TOKEN}"
           curl -X POST --header "Content-Type: application/json" --data "{\"content\": \"$MSG\"}" "$POST"
