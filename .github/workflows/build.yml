@@ -135,5 +135,5 @@ jobs:
           
           echo "'$MSG'"
           MSG=${MSG:0:9450}
-          POST="https://discord.com/api/webhooks/${WEBHOOK_ID}/${WEBHOOK_TOKEN}"
+          POST="https://discord.com/api/webhooks/${DISCORD_WEBHOOK}"
           curl -X POST --header "Content-Type: application/json" --data "{\"content\": \"$MSG\"}" "$POST"
