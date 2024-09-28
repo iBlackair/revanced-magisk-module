@@ -109,8 +109,9 @@ jobs:
 
       - name: Report to Discord
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        if: env.DISCORD_WEBHOOK != null
+          WEBHOOK_ID: ${{ secrets.WEBHOOK_ID }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+        if: env.WEBHOOK_ID != null && env.WEBHOOK_TOKEN != null
         run: |
           cd build || { echo "build folder not found"; exit 1; }
 
@@ -134,5 +135,5 @@ jobs:
           
           echo "'$MSG'"
           MSG=${MSG:0:9450}
-          POST="https://discord.com/api/webhooks/${DISCORD_WEBHOOK}"
+          POST="https://discord.com/api/webhooks/${WEBHOOK_ID}/${WEBHOOK_TOKEN}"
           curl -X POST --header "Content-Type: application/json" --data "{\"content\": \"$MSG\"}" "$POST"
